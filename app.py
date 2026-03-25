@@ -3,7 +3,6 @@ import os
 from datetime import date, datetime, time
 
 import streamlit as st
-from dotenv import load_dotenv
 from openai import OpenAI
 
 from modules.classifier import classify_articles
@@ -11,9 +10,6 @@ from modules.daum_search import search_daum_news
 from modules.excel_writer import create_excel
 from modules.file_parser import parse_input_file
 from modules.naver_search import search_naver_news
-
-load_dotenv()
-
 
 def _secret(key: str) -> str:
     """Streamlit Cloud Secrets 우선, 없으면 .env 환경변수 fallback"""
@@ -44,32 +40,20 @@ if "result_summary" not in st.session_state:
     st.session_state.result_summary = None
 
 # ────────────────────────────────────────────────
-# 사이드바: API 키 설정
+# API 키 로드 (내부용, UI 노출 없음)
 # ────────────────────────────────────────────────
-with st.sidebar:
-    st.header("⚙️ API 설정")
-    st.caption(".env 파일에 입력하거나 여기에 직접 입력하세요.")
+openai_key = _secret("OPENAI_API_KEY")
+naver_client_id = _secret("NAVER_CLIENT_ID")
+naver_client_secret = _secret("NAVER_CLIENT_SECRET")
 
-    openai_key = st.text_input(
-        "OpenAI API Key",
-        value=_secret("OPENAI_API_KEY"),
-        type="password",
-        placeholder="sk-...",
-    )
-    naver_client_id = st.text_input(
-        "네이버 Client ID",
-        value=_secret("NAVER_CLIENT_ID"),
-        placeholder="네이버 개발자센터에서 발급",
-    )
-    naver_client_secret = st.text_input(
-        "네이버 Client Secret",
-        value=_secret("NAVER_CLIENT_SECRET"),
-        type="password",
-        placeholder="네이버 개발자센터에서 발급",
-    )
-
-    st.divider()
-    st.caption("💡 API 키는 .env 파일에 저장하면 매번 입력하지 않아도 됩니다.")
+# 키 누락 시 경고 표시
+missing = []
+if not openai_key:
+    missing.append("OPENAI_API_KEY")
+if not naver_client_id or not naver_client_secret:
+    missing.append("NAVER API 키")
+if missing:
+    st.error(f"설정 누락: {', '.join(missing)} — 관리자에게 문의하세요.")
 
 # ────────────────────────────────────────────────
 # 메인 영역: 2컬럼 레이아웃
@@ -149,17 +133,8 @@ if st.button(
     use_container_width=True,
 ):
     # 입력값 검증
-    errors = []
-    if not openai_key:
-        errors.append("OpenAI API Key가 없습니다.")
-    if use_naver and (not naver_client_id or not naver_client_secret):
-        errors.append("네이버 API 키(Client ID / Client Secret)가 없습니다.")
     if start_time >= end_time:
-        errors.append("시작 시간이 종료 시간보다 앞이어야 합니다.")
-
-    if errors:
-        for e in errors:
-            st.error(e)
+        st.error("시작 시간이 종료 시간보다 앞이어야 합니다.")
         st.stop()
 
     start_dt = datetime.combine(search_date, start_time)
