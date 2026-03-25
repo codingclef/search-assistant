@@ -1,0 +1,25 @@
+# API 키 - 절대 GitHub에 올리지 않음
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 가상환경
+venv/
+.venv/
+env/
+
+# 출력 파일
+*.xlsx
+output/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
