@@ -81,6 +81,7 @@ with col_left:
     # 분류 기준
     st.subheader("② 분류 기준")
     st.caption("시트명과 해당 시트에 넣을 기사의 조건을 입력하세요.")
+    st.caption("💡 일람 (수집된 모든 기사)과 보류 (AI가 분류하지 못한 기사) 시트는 입력 여부와 관계없이 항상 자동으로 생성됩니다.")
 
     # 헤더
     h1, h2, h3 = st.columns([2, 5, 1])
@@ -111,11 +112,7 @@ with col_left:
                 st.rerun()
 
     # 시트 추가 버튼
-    if st.button(
-        "＋ 시트 추가",
-        use_container_width=False,
-        help="💡 일람 (수집된 모든 기사)과 보류 (AI가 분류하지 못한 기사) 시트는 입력 여부와 관계없이 항상 자동으로 생성됩니다.",
-    ):
+    if st.button("＋ 시트 추가", use_container_width=False):
         st.session_state.cat_ids.append(st.session_state.cat_counter)
         st.session_state.cat_counter += 1
         st.rerun()
@@ -134,7 +131,7 @@ with col_right:
     with col_t1:
         start_time = st.time_input("시작 시간", value=time(9, 0), help=_time_help)
     with col_t2:
-        end_time = st.time_input("종료 시간", value=time(13, 0), help=_time_help)
+        end_time = st.time_input("종료 시간", value=time(13, 0))
 
     st.markdown("**검색 엔진**")
     use_naver = st.checkbox("네이버 뉴스", value=True)
@@ -292,9 +289,6 @@ if st.session_state.excel_bytes:
 # ────────────────────────────────────────────────
 st.divider()
 with st.expander("📋 엑셀 출력 형식 미리보기"):
-    st.markdown("**공통 사항**")
-    st.caption("• 일람/보류 시트는 항상 자동 생성됩니다.\n• 모든 시트 맨 앞에 No. 컬럼(행 번호)이 있습니다.")
-
     st.markdown("**일람 시트** (수집된 모든 기사)")
     st.table({
         "No.": [1, 2],
