@@ -37,10 +37,12 @@ if "excel_bytes" not in st.session_state:
     st.session_state.excel_bytes = None
 if "result_summary" not in st.session_state:
     st.session_state.result_summary = None
+if "val_errors" not in st.session_state:
+    st.session_state.val_errors = set()
 
 # 분류 기준 행 관리 (고유 ID 방식)
 if "cat_ids" not in st.session_state:
-    st.session_state.cat_ids = [0, 1]   # 기본 2개
+    st.session_state.cat_ids = [0, 1]
 if "cat_counter" not in st.session_state:
     st.session_state.cat_counter = 2
 
@@ -50,6 +52,7 @@ if "cat_counter" not in st.session_state:
 openai_key = _secret("OPENAI_API_KEY")
 naver_client_id = _secret("NAVER_CLIENT_ID")
 naver_client_secret = _secret("NAVER_CLIENT_SECRET")
+app_password = _secret("APP_PASSWORD")
 
 missing = []
 if not openai_key:
@@ -75,6 +78,8 @@ with col_left:
         height=80,
         label_visibility="collapsed",
     )
+    if "keywords" in st.session_state.val_errors:
+        st.error("키워드를 입력해주세요.")
 
     st.divider()
 
@@ -111,6 +116,9 @@ with col_left:
                 st.session_state.cat_ids.remove(cat_id)
                 st.rerun()
 
+    if "categories" in st.session_state.val_errors:
+        st.error("시트명을 1개 이상 입력해주세요.")
+
     # 시트 추가 버튼
     if st.button("＋ 시트 추가", use_container_width=False):
         st.session_state.cat_ids.append(st.session_state.cat_counter)
@@ -133,15 +141,20 @@ with col_right:
     with col_t2:
         end_time = st.time_input("종료 시간", value=time(13, 0))
 
+    if "time_range" in st.session_state.val_errors:
+        st.error("시작 시간이 종료 시간보다 앞이어야 합니다.")
+
     st.markdown("**검색 엔진**")
     use_naver = st.checkbox("네이버 뉴스", value=True)
     use_daum = st.checkbox("다음 뉴스", value=True)
 
-    if not use_naver and not use_daum:
-        st.warning("검색 엔진을 최소 1개 이상 선택해주세요.")
+    if "engines" in st.session_state.val_errors:
+        st.error("검색 엔진을 최소 1개 이상 선택해주세요.")
 
     st.divider()
     entered_pw = st.text_input("비밀번호", type="password", placeholder="비밀번호를 입력하세요")
+    if "password" in st.session_state.val_errors:
+        st.error("비밀번호가 일치하지 않습니다.")
 
 # ────────────────────────────────────────────────
 # 모니터링 시작 버튼
@@ -157,20 +170,27 @@ for cat_id in st.session_state.cat_ids:
     if name:
         categories[name] = cond
 
-app_password = _secret("APP_PASSWORD")
-password_ok = (entered_pw == app_password) if app_password else True
+if st.button("🔍 모니터링 시작", type="primary", use_container_width=True):
 
-can_search = bool(keywords) and bool(categories) and (use_naver or use_daum) and password_ok
-
-if st.button(
-    "🔍 모니터링 시작",
-    type="primary",
-    disabled=not can_search,
-    use_container_width=True,
-):
+    # ── 입력값 검증 ──
+    errors = set()
+    if not keywords:
+        errors.add("keywords")
+    if not categories:
+        errors.add("categories")
     if start_time >= end_time:
-        st.error("시작 시간이 종료 시간보다 앞이어야 합니다.")
-        st.stop()
+        errors.add("time_range")
+    if not use_naver and not use_daum:
+        errors.add("engines")
+    if app_password and entered_pw != app_password:
+        errors.add("password")
+
+    if errors:
+        st.session_state.val_errors = errors
+        st.rerun()
+
+    # 검증 통과 → 에러 초기화 후 실행
+    st.session_state.val_errors = set()
 
     start_dt = datetime.combine(search_date, start_time)
     end_dt = datetime.combine(search_date, end_time)
