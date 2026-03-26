@@ -6,7 +6,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-HEADER = ["프리셋명", "키워드", "분류기준"]
+HEADER = ["프리셋명", "키워드", "분류기준", "설정"]
 
 
 def _get_sheet():
@@ -22,12 +22,12 @@ def _get_sheet():
     try:
         ws = sheet.worksheet("프리셋")
     except gspread.WorksheetNotFound:
-        ws = sheet.add_worksheet(title="프리셋", rows=100, cols=3)
+        ws = sheet.add_worksheet(title="프리셋", rows=100, cols=4)
         ws.append_row(HEADER)
 
-    # 헤더가 없으면 추가
+    # 헤더가 없거나 열이 부족하면 업데이트
     if ws.row_values(1) != HEADER:
-        ws.insert_row(HEADER, 1)
+        ws.update("A1", [HEADER])
 
     return ws
 
@@ -49,9 +49,14 @@ def load_presets() -> dict[str, dict]:
                 categories = json.loads(row.get("분류기준", "{}"))
             except Exception:
                 categories = {}
+            try:
+                settings = json.loads(row.get("설정", "{}") or "{}")
+            except Exception:
+                settings = {}
             presets[name] = {
                 "keywords": str(row.get("키워드", "")),
                 "categories": categories,
+                "settings": settings,
             }
         return presets
     except Exception as e:
@@ -59,7 +64,7 @@ def load_presets() -> dict[str, dict]:
         return {}
 
 
-def save_preset(name: str, keywords: str, categories: dict) -> bool:
+def save_preset(name: str, keywords: str, categories: dict, settings: dict | None = None) -> bool:
     """
     프리셋을 저장합니다. 같은 이름이 있으면 덮어씁니다.
     """
@@ -67,12 +72,17 @@ def save_preset(name: str, keywords: str, categories: dict) -> bool:
         ws = _get_sheet()
         rows = ws.get_all_values()
 
-        new_row = [name, keywords, json.dumps(categories, ensure_ascii=False)]
+        new_row = [
+            name,
+            keywords,
+            json.dumps(categories, ensure_ascii=False),
+            json.dumps(settings or {}, ensure_ascii=False),
+        ]
 
         # 같은 이름 행이 있으면 업데이트
         for i, row in enumerate(rows[1:], start=2):  # 헤더 제외
             if row and str(row[0]).strip() == name:
-                ws.update(f"A{i}:C{i}", [new_row])
+                ws.update(f"A{i}:D{i}", [new_row])
                 return True
 
         # 없으면 새 행 추가

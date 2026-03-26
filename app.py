@@ -128,6 +128,21 @@ with col_left:
                 for i, (name, cond) in enumerate(p["categories"].items()):
                     st.session_state[f"cat_name_{i}"] = name
                     st.session_state[f"cat_cond_{i}"] = cond
+                settings = p.get("settings", {})
+                if settings.get("start_time"):
+                    try:
+                        st.session_state["start_time_input"] = datetime.strptime(settings["start_time"], "%H:%M").time()
+                    except ValueError:
+                        pass
+                if settings.get("end_time"):
+                    try:
+                        st.session_state["end_time_input"] = datetime.strptime(settings["end_time"], "%H:%M").time()
+                    except ValueError:
+                        pass
+                if "use_naver" in settings:
+                    st.session_state["use_naver"] = settings["use_naver"]
+                if "use_daum" in settings:
+                    st.session_state["use_daum"] = settings["use_daum"]
                 st.rerun()
         with col_ren:
             if st.button(S["preset_rename"], use_container_width=True, disabled=selected_preset is None):
@@ -197,7 +212,13 @@ with col_left:
         elif not cats:
             st.error(S["preset_err_categories"])
         else:
-            if save_preset(preset_name.strip(), kw, cats):
+            settings = {
+                "start_time": st.session_state.get("start_time_input", time(9, 0)).strftime("%H:%M"),
+                "end_time": st.session_state.get("end_time_input", time(13, 0)).strftime("%H:%M"),
+                "use_naver": st.session_state.get("use_naver", True),
+                "use_daum": st.session_state.get("use_daum", True),
+            }
+            if save_preset(preset_name.strip(), kw, cats, settings):
                 st.success(S["preset_save_success"].format(name=preset_name))
                 st.rerun()
 
@@ -269,17 +290,17 @@ with col_right:
 
     col_t1, col_t2 = st.columns(2)
     with col_t1:
-        start_time = st.time_input(S["start_time_label"], value=time(9, 0), help=S["time_help"])
+        start_time = st.time_input(S["start_time_label"], value=time(9, 0), help=S["time_help"], key="start_time_input")
     with col_t2:
-        end_time = st.time_input(S["end_time_label"], value=time(13, 0))
+        end_time = st.time_input(S["end_time_label"], value=time(13, 0), key="end_time_input")
 
     if "time_range" in st.session_state.val_errors:
         st.error(S["time_range_err"])
 
     st.markdown(S["search_engine_label"])
-    use_naver = st.checkbox(S["naver_checkbox"], value=True)
+    use_naver = st.checkbox(S["naver_checkbox"], value=True, key="use_naver")
     st.caption(S["tip_naver_limit"])
-    use_daum = st.checkbox(S["daum_checkbox"], value=True)
+    use_daum = st.checkbox(S["daum_checkbox"], value=True, key="use_daum")
     st.caption(S["tip_daum_limit"])
 
     if "engines" in st.session_state.val_errors:
