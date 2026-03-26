@@ -573,8 +573,10 @@ if st.session_state.classified is not None:
         if tab_df.empty:
             st.caption(no_articles_msg)
             return
+        orig_indices = list(tab_df.index)
+        tab_df_reset = tab_df.reset_index(drop=True)
         edited = st.data_editor(
-            tab_df,
+            tab_df_reset,
             column_config=col_config,
             hide_index=True,
             use_container_width=True,
@@ -582,9 +584,9 @@ if st.session_state.classified is not None:
         )
         if st.button(S["feedback_save_button"], key=f"save_{tab_key}_{st.session_state.run_id}", type="secondary"):
             changes = []
-            for orig_idx in tab_df.index:
-                orig_cat = tab_df.loc[orig_idx, S["col_category"]]
-                edited_cat = edited.loc[orig_idx, S["col_category"]]
+            for reset_idx, orig_idx in enumerate(orig_indices):
+                orig_cat = tab_df_reset.loc[reset_idx, S["col_category"]]
+                edited_cat = edited.loc[reset_idx, S["col_category"]]
                 if orig_cat != edited_cat:
                     changes.append({"title": classified_data[orig_idx]["title"], "category": edited_cat})
             if changes:
@@ -594,6 +596,7 @@ if st.session_state.classified is not None:
                 st.info(S["feedback_no_changes"])
 
     with tabs[0]:
+        st.caption(S["ilam_feedback_hint"])
         st.dataframe(
             df_ilam,
             column_config=col_config_ilam,
