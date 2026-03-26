@@ -20,6 +20,17 @@ KO: dict[str, str] = {
     "keywords_label": "모니터링할 키워드를 쉼표(,)로 구분하여 입력하세요",
     "keywords_placeholder": "예: 삼성전자, 이재용, 갤럭시",
     "keywords_err": "키워드를 입력해주세요.",
+    # 프리뷰 예시 데이터
+    "preview_kw_1": "삼성전자",
+    "preview_kw_2": "이재용",
+    "preview_media_1": "한국경제",
+    "preview_media_2": "조선일보",
+    "preview_title_1": "삼성전자 신형 반도체 공개",
+    "preview_title_2": "이재용 회장 해외 출장",
+    "preview_cat_1": "단순언급",
+    "preview_cat_2": "부정적",
+    "preview_reason_1": "제품 출시 관련 단순 보도",
+    "preview_reason_2": "경영 활동 관련 부정적 내용 포함",
     # 분류 기준
     "section_categories": "③ 분류 기준",
     "categories_caption": "시트명과 해당 시트에 넣을 기사의 조건을 입력하세요.",
@@ -122,8 +133,19 @@ JA: dict[str, str] = {
     # キーワード
     "section_keywords": "② キーワード",
     "keywords_label": "モニタリングするキーワードをカンマ(,)で区切って入力してください",
-    "keywords_placeholder": "例: 삼성전자, 이재용, 갤럭시",
+    "keywords_placeholder": "例: トヨタ, 豊田章男, EV戦略",
     "keywords_err": "キーワードを入力してください。",
+    # プレビュー例示データ
+    "preview_kw_1": "トヨタ",
+    "preview_kw_2": "豊田章男",
+    "preview_media_1": "日本経済新聞",
+    "preview_media_2": "朝日新聞",
+    "preview_title_1": "トヨタ 新型EV世界初公開",
+    "preview_title_2": "豊田章男会長 欧州出張",
+    "preview_cat_1": "単純言及",
+    "preview_cat_2": "否定的",
+    "preview_reason_1": "製品発表に関する単純報道",
+    "preview_reason_2": "経営活動に関する否定的内容を含む",
     # 分類基準
     "section_categories": "③ 分類基準",
     "categories_caption": "シート名と該当シートに入れる記事の条件を入力してください。",

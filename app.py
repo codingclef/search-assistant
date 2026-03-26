@@ -420,25 +420,25 @@ with st.expander(S["preview_expander"]):
     st.markdown(S["preview_ilam"])
     st.table({
         S["col_no"]: [1, 2],
-        S["col_keyword"]: ["삼성전자", "이재용"],
+        S["col_keyword"]: [S["preview_kw_1"], S["preview_kw_2"]],
         S["col_datetime"]: ["2024-03-25 09:30", "2024-03-25 10:15"],
         S["col_engine"]: [S["engine_naver"], S["engine_daum"]],
-        S["col_media"]: ["한국경제", "조선일보"],
-        S["col_title"]: ["삼성전자 신형 반도체 공개", "이재용 회장 해외 출장"],
+        S["col_media"]: [S["preview_media_1"], S["preview_media_2"]],
+        S["col_title"]: [S["preview_title_1"], S["preview_title_2"]],
         S["col_link"]: ["https://...", "https://..."],
-        S["col_category"]: ["단순언급", "부정적"],
+        S["col_category"]: [S["preview_cat_1"], S["preview_cat_2"]],
     })
 
     st.markdown(S["preview_other"])
     st.table({
         S["col_no"]: [1, 2],
-        S["col_keyword"]: ["삼성전자", "이재용"],
+        S["col_keyword"]: [S["preview_kw_1"], S["preview_kw_2"]],
         S["col_datetime"]: ["2024-03-25 09:30", "2024-03-25 10:15"],
         S["col_engine"]: [S["engine_naver"], S["engine_daum"]],
-        S["col_media"]: ["한국경제", "조선일보"],
-        S["col_title"]: ["삼성전자 신형 반도체 공개", "이재용 회장 해외 출장"],
+        S["col_media"]: [S["preview_media_1"], S["preview_media_2"]],
+        S["col_title"]: [S["preview_title_1"], S["preview_title_2"]],
         S["col_link"]: ["https://...", "https://..."],
-        S["col_reason"]: ["제품 출시 관련 단순 보도", "경영 활동 관련 부정적 내용 포함"],
+        S["col_reason"]: [S["preview_reason_1"], S["preview_reason_2"]],
     })
 
 # ────────────────────────────────────────────────
