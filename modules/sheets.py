@@ -101,6 +101,23 @@ def delete_preset(name: str) -> bool:
         return False
 
 
+def rename_preset(old_name: str, new_name: str) -> bool:
+    """프리셋 이름을 변경합니다."""
+    try:
+        ws = _get_sheet()
+        rows = ws.get_all_values()
+
+        for i, row in enumerate(rows[1:], start=2):
+            if row and str(row[0]).strip() == old_name:
+                ws.update(f"A{i}", [[new_name]])
+                return True
+        return False
+
+    except Exception as e:
+        st.warning(f"프리셋 이름 변경 실패: {e}")
+        return False
+
+
 # ── 피드백 ──────────────────────────────────────
 
 FEEDBACK_SHEET = "피드백"

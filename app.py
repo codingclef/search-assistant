@@ -12,7 +12,7 @@ from modules.daum_search import search_daum_news
 from modules.excel_writer import create_excel
 from modules.i18n import get_strings
 from modules.naver_search import search_naver_news
-from modules.sheets import load_presets, save_preset, delete_preset, load_feedback, save_feedback
+from modules.sheets import load_presets, save_preset, delete_preset, rename_preset, load_feedback, save_feedback
 
 
 def _secret(key: str) -> str:
@@ -68,6 +68,8 @@ if "categories_state" not in st.session_state:
     st.session_state.categories_state = {}
 if "run_id" not in st.session_state:
     st.session_state.run_id = 0
+if "renaming_preset" not in st.session_state:
+    st.session_state.renaming_preset = False
 
 # 분류 기준 행 관리 (고유 ID 방식)
 if "cat_ids" not in st.session_state:
@@ -104,18 +106,20 @@ with col_left:
     presets = load_presets()
 
     if presets:
-        col_sel, col_load, col_del = st.columns([4, 1, 1])
+        col_sel, col_load, col_ren, col_del = st.columns([3, 1, 1, 1])
         with col_sel:
             selected_preset = st.selectbox(
                 "preset_select",
                 options=list(presets.keys()),
                 label_visibility="collapsed",
+                on_change=lambda: setattr(st.session_state, "renaming_preset", False),
             )
         with col_load:
             if st.button(S["preset_load"], use_container_width=True):
                 p = presets[selected_preset]
                 st.session_state["preset_keywords"] = p["keywords"]
                 st.session_state["preset_name_input"] = selected_preset
+                st.session_state.renaming_preset = False
                 new_ids = list(range(len(p["categories"])))
                 st.session_state.cat_ids = new_ids
                 st.session_state.cat_counter = len(new_ids)
@@ -123,10 +127,43 @@ with col_left:
                     st.session_state[f"cat_name_{i}"] = name
                     st.session_state[f"cat_cond_{i}"] = cond
                 st.rerun()
+        with col_ren:
+            if st.button(S["preset_rename"], use_container_width=True):
+                st.session_state.renaming_preset = not st.session_state.renaming_preset
+                st.rerun()
         with col_del:
             if st.button(S["preset_delete"], use_container_width=True):
                 delete_preset(selected_preset)
+                st.session_state.renaming_preset = False
                 st.rerun()
+
+        # 이름변경 UI
+        if st.session_state.renaming_preset:
+            col_new, col_ok, col_cancel = st.columns([4, 1, 1])
+            with col_new:
+                new_preset_name = st.text_input(
+                    "new_preset_name",
+                    value=selected_preset,
+                    placeholder=S["preset_rename_placeholder"],
+                    label_visibility="collapsed",
+                )
+            with col_ok:
+                if st.button(S["preset_rename_confirm"], use_container_width=True, type="primary"):
+                    if not new_preset_name.strip():
+                        st.error(S["preset_rename_err_empty"])
+                    elif new_preset_name.strip() == selected_preset:
+                        st.error(S["preset_rename_err_same"])
+                    else:
+                        if rename_preset(selected_preset, new_preset_name.strip()):
+                            st.session_state.renaming_preset = False
+                            st.success(S["preset_rename_success"].format(
+                                old=selected_preset, new=new_preset_name.strip()
+                            ))
+                            st.rerun()
+            with col_cancel:
+                if st.button(S["preset_rename_cancel"], use_container_width=True):
+                    st.session_state.renaming_preset = False
+                    st.rerun()
     else:
         st.caption(S["preset_none"])
 
