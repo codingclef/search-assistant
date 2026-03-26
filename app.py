@@ -320,13 +320,20 @@ if monitoring_clicked:
 
         progress_bar.progress((i + 1) / total_steps * 0.4)
 
-    # ── 중복 제거 (URL 기준) ──
-    seen = set()
+    # ── 중복 제거 (URL 기준) + 키워드 병합 ──
+    seen = {}  # link -> unique_articles 인덱스
     unique_articles = []
     for a in all_articles:
-        if a["link"] not in seen:
-            seen.add(a["link"])
+        link = a["link"]
+        if link not in seen:
+            seen[link] = len(unique_articles)
             unique_articles.append(a)
+        else:
+            # 이미 있는 기사에 키워드 추가 (중복 제외)
+            existing = unique_articles[seen[link]]
+            existing_kws = [k.strip() for k in existing["keyword"].split(",")]
+            if a["keyword"] not in existing_kws:
+                existing["keyword"] = existing["keyword"] + ", " + a["keyword"]
 
     log_box.caption(S["log_collected"].format(count=len(unique_articles)))
 
