@@ -111,11 +111,13 @@ with col_left:
             selected_preset = st.selectbox(
                 "preset_select",
                 options=list(presets.keys()),
+                index=None,
+                placeholder=S["preset_select_placeholder"],
                 label_visibility="collapsed",
                 on_change=lambda: setattr(st.session_state, "renaming_preset", False),
             )
         with col_load:
-            if st.button(S["preset_load"], use_container_width=True):
+            if st.button(S["preset_load"], use_container_width=True, disabled=selected_preset is None):
                 p = presets[selected_preset]
                 st.session_state["keywords_input"] = p["keywords"]
                 st.session_state["preset_name_input"] = selected_preset
@@ -128,17 +130,17 @@ with col_left:
                     st.session_state[f"cat_cond_{i}"] = cond
                 st.rerun()
         with col_ren:
-            if st.button(S["preset_rename"], use_container_width=True):
+            if st.button(S["preset_rename"], use_container_width=True, disabled=selected_preset is None):
                 st.session_state.renaming_preset = not st.session_state.renaming_preset
                 st.rerun()
         with col_del:
-            if st.button(S["preset_delete"], use_container_width=True):
+            if st.button(S["preset_delete"], use_container_width=True, disabled=selected_preset is None):
                 delete_preset(selected_preset)
                 st.session_state.renaming_preset = False
                 st.rerun()
 
         # 이름변경 UI
-        if st.session_state.renaming_preset:
+        if st.session_state.renaming_preset and selected_preset is not None:
             col_new, col_ok, col_cancel = st.columns([4, 1, 1])
             with col_new:
                 new_preset_name = st.text_input(
@@ -344,6 +346,10 @@ if monitoring_clicked:
 
     all_articles = []
     total_steps = len(keywords)
+    _should_stop = False
+    _stop_error = None
+    unique_articles = []
+    classified = []
 
     with st.spinner(S["spinner_text"]):
 
@@ -373,7 +379,6 @@ if monitoring_clicked:
 
         # ── 중복 제거 (URL 기준) + 키워드 병합 ──
         seen = {}  # link -> unique_articles 인덱스
-        unique_articles = []
         for a in all_articles:
             link = a["link"]
             if link not in seen:
@@ -392,45 +397,53 @@ if monitoring_clicked:
             status_box.warning(S["warn_no_articles"])
             progress_bar.empty()
             log_box.empty()
-            st.stop()
+            _should_stop = True
 
-        # 일본어 모드일 때 검색엔진 표시값 변환
-        if lang == "ja":
-            eng_map = {"네이버": S["engine_naver"], "다음": S["engine_daum"]}
-            for a in unique_articles:
-                a["search_engine"] = eng_map.get(a["search_engine"], a["search_engine"])
+        if not _should_stop:
+            # 일본어 모드일 때 검색엔진 표시값 변환
+            if lang == "ja":
+                eng_map = {"네이버": S["engine_naver"], "다음": S["engine_daum"]}
+                for a in unique_articles:
+                    a["search_engine"] = eng_map.get(a["search_engine"], a["search_engine"])
 
-        # ── STEP 2: GPT 분류 ──
-        status_box.info(S["status_classifying"])
-        client = OpenAI(api_key=openai_key)
-        feedback_examples = load_feedback()
+            # ── STEP 2: GPT 분류 ──
+            status_box.info(S["status_classifying"])
+            client = OpenAI(api_key=openai_key)
+            feedback_examples = load_feedback()
 
-        def on_progress(current: int, total: int):
-            _log(S["log_classifying"].format(current=current, total=total))
-            progress_bar.progress(0.4 + (current / total) * 0.5 if total > 0 else 0.4)
+            def on_progress(current: int, total: int):
+                _log(S["log_classifying"].format(current=current, total=total))
+                progress_bar.progress(0.4 + (current / total) * 0.5 if total > 0 else 0.4)
 
-        try:
-            classified = classify_articles(
-                unique_articles,
-                categories,
-                client,
-                progress_callback=on_progress,
-                feedback_examples=feedback_examples,
-            )
-        except Exception as e:
-            st.error(S["err_classify"].format(e=e))
-            st.stop()
+            try:
+                classified = classify_articles(
+                    unique_articles,
+                    categories,
+                    client,
+                    progress_callback=on_progress,
+                    feedback_examples=feedback_examples,
+                )
+            except Exception as e:
+                _stop_error = S["err_classify"].format(e=e)
+                _should_stop = True
 
-        # ── STEP 3: 엑셀 생성 ──
-        status_box.info(S["status_excel"])
-        _log(S["log_excel"])
+        if not _should_stop:
+            # ── STEP 3: 엑셀 생성 ──
+            status_box.info(S["status_excel"])
+            _log(S["log_excel"])
 
-        try:
-            excel_bytes = create_excel(classified, list(categories.keys()), lang=lang)
-            st.session_state.excel_bytes = excel_bytes
-        except Exception as e:
-            st.error(S["err_excel"].format(e=e))
-            st.stop()
+            try:
+                excel_bytes = create_excel(classified, list(categories.keys()), lang=lang)
+                st.session_state.excel_bytes = excel_bytes
+            except Exception as e:
+                _stop_error = S["err_excel"].format(e=e)
+                _should_stop = True
+
+    # 스피너 종료 후 오류 표시 및 중단
+    if _stop_error:
+        st.error(_stop_error)
+    if _should_stop:
+        st.stop()
 
     # ── 완료 ──
     progress_bar.progress(1.0)
