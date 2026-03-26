@@ -569,6 +569,30 @@ if st.session_state.classified is not None:
     }
     df_ilam = df_all.drop(columns=[S["col_reason_ai"]])
 
+    def _feedback_tab(tab_df, tab_key, no_articles_msg):
+        if tab_df.empty:
+            st.caption(no_articles_msg)
+            return
+        edited = st.data_editor(
+            tab_df,
+            column_config=col_config,
+            hide_index=True,
+            use_container_width=True,
+            key=f"feedback_editor_{tab_key}_{st.session_state.run_id}",
+        )
+        if st.button(S["feedback_save_button"], key=f"save_{tab_key}_{st.session_state.run_id}", type="secondary"):
+            changes = []
+            for orig_idx in tab_df.index:
+                orig_cat = tab_df.loc[orig_idx, S["col_category"]]
+                edited_cat = edited.loc[orig_idx, S["col_category"]]
+                if orig_cat != edited_cat:
+                    changes.append({"title": classified_data[orig_idx]["title"], "category": edited_cat})
+            if changes:
+                if save_feedback(changes):
+                    st.success(S["feedback_save_success"].format(count=len(changes)))
+            else:
+                st.info(S["feedback_no_changes"])
+
     with tabs[0]:
         st.dataframe(
             df_ilam,
@@ -579,25 +603,13 @@ if st.session_state.classified is not None:
 
     for i, cat in enumerate(cats.keys()):
         with tabs[i + 1]:
-            cat_df = df_all[df_all[S["col_category"]] == cat].reset_index(drop=True)
-            if cat_df.empty:
-                st.caption(S["no_articles_in_cat"])
-            else:
-                st.dataframe(cat_df, hide_index=True, use_container_width=True,
-                             column_config=col_config)
+            cat_df = df_all[df_all[S["col_category"]] == cat]
+            _feedback_tab(cat_df, f"cat_{i}", S["no_articles_in_cat"])
 
     with tabs[-2]:
-        unc_df = df_all[df_all[S["col_category"]] == "보류"].reset_index(drop=True)
-        if unc_df.empty:
-            st.caption(S["no_articles_holdup"])
-        else:
-            st.dataframe(unc_df, hide_index=True, use_container_width=True,
-                         column_config=col_config)
+        holdup_df = df_all[df_all[S["col_category"]] == "보류"]
+        _feedback_tab(holdup_df, "holdup", S["no_articles_holdup"])
 
     with tabs[-1]:
-        na_df = df_all[df_all[S["col_category"]] == "해당없음"].reset_index(drop=True)
-        if na_df.empty:
-            st.caption(S["no_articles_na"])
-        else:
-            st.dataframe(na_df, hide_index=True, use_container_width=True,
-                         column_config=col_config)
+        na_df = df_all[df_all[S["col_category"]] == "해당없음"]
+        _feedback_tab(na_df, "na", S["no_articles_na"])
