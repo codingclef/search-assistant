@@ -7,6 +7,7 @@ from openai import OpenAI
 
 
 UNCLASSIFIED = "보류"
+UNCATEGORIZED = "해당없음"
 
 
 def classify_articles(
@@ -28,6 +29,7 @@ def classify_articles(
         return []
 
     classifiable = list(categories.keys())
+    valid_special = [UNCLASSIFIED, UNCATEGORIZED]
 
     # 분류 기준 텍스트
     categories_desc = "\n".join(
@@ -77,7 +79,7 @@ def classify_articles(
 {examples_block}분류 기준:
 {categories_desc}
 
-선택 가능한 카테고리: {', '.join(classifiable)}, 보류
+선택 가능한 카테고리: {', '.join(classifiable)}, 보류, 해당없음
 
 반드시 아래 JSON 형식으로만 응답하세요:
 {{
@@ -85,9 +87,10 @@ def classify_articles(
     "reason": "분류 이유를 1~2문장으로 설명"
 }}
 
-- category는 위 목록 중 하나 또는 '보류'여야 합니다.
+- category는 위 목록 중 하나 또는 '보류' 또는 '해당없음'이어야 합니다.
 - 카테고리에 완전히 확신하는 경우에만 해당 카테고리를 선택하세요.
-- 조금이라도 판단이 애매하거나 확신하기 어려우면 반드시 '보류'로 응답하세요.""",
+- 조금이라도 판단이 애매하거나 확신하기 어려우면 반드시 '보류'로 응답하세요.
+- 어떤 카테고리에도 해당하지 않고 애매하지도 않은 명백한 무관련 기사는 '해당없음'으로 응답하세요.""",
                     },
                 ],
                 response_format={"type": "json_object"},
@@ -97,8 +100,8 @@ def classify_articles(
             result = json.loads(response.choices[0].message.content)
             chosen = result.get("category", "")
 
-            # 유효한 카테고리인지 검증 (미분류 포함)
-            if chosen not in classifiable and chosen != UNCLASSIFIED:
+            # 유효한 카테고리인지 검증
+            if chosen not in classifiable and chosen not in valid_special:
                 chosen = UNCLASSIFIED
 
             article["category"] = chosen

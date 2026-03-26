@@ -17,6 +17,7 @@ HEADER_FG = "FFFFFF"
 
 # 데이터 필터링용 상수 (항상 한국어 고정)
 _CAT_HOLDUP = "보류"
+_CAT_NA = "해당없음"
 
 
 def create_excel(
@@ -66,6 +67,16 @@ def create_excel(
             _add_row(ws_unc, article, idx, is_ilam=False)
             idx += 1
     _apply_column_widths(ws_unc, is_ilam=False)
+
+    # 4. 해당없음/該当なし 시트
+    ws_na = wb.create_sheet(title=S["sheet_na"])
+    _setup_header(ws_na, cols_other)
+    idx = 1
+    for article in articles:
+        if article.get("category") == _CAT_NA:
+            _add_row(ws_na, article, idx, is_ilam=False)
+            idx += 1
+    _apply_column_widths(ws_na, is_ilam=False)
 
     output = io.BytesIO()
     wb.save(output)

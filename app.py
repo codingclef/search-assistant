@@ -461,6 +461,7 @@ if monitoring_clicked:
     for cat in categories.keys():
         summary[cat] = sum(1 for a in classified if a.get("category") == cat)
     summary[S["sheet_holdup"]] = sum(1 for a in classified if a.get("category") == "보류")
+    summary[S["sheet_na"]] = sum(1 for a in classified if a.get("category") == "해당없음")
     st.session_state.result_summary = summary
 
 # ────────────────────────────────────────────────
@@ -540,7 +541,7 @@ if st.session_state.classified is not None:
         })
 
     df_all = pd.DataFrame(rows)
-    cat_options = list(cats.keys()) + ["보류"]
+    cat_options = list(cats.keys()) + ["보류", "해당없음"]
 
     col_config = {
         S["col_no"]: st.column_config.NumberColumn(disabled=True, width="small"),
@@ -557,7 +558,7 @@ if st.session_state.classified is not None:
         S["col_reason_ai"]: st.column_config.TextColumn(disabled=True),
     }
 
-    tab_names = [S["sheet_ilam"]] + list(cats.keys()) + [S["sheet_holdup"]]
+    tab_names = [S["sheet_ilam"]] + list(cats.keys()) + [S["sheet_holdup"], S["sheet_na"]]
     tabs = st.tabs(tab_names)
 
     with tabs[0]:
@@ -591,10 +592,18 @@ if st.session_state.classified is not None:
                 st.dataframe(cat_df, hide_index=True, use_container_width=True,
                              column_config=col_config)
 
-    with tabs[-1]:
+    with tabs[-2]:
         unc_df = df_all[df_all[S["col_category"]] == "보류"].reset_index(drop=True)
         if unc_df.empty:
             st.caption(S["no_articles_holdup"])
         else:
             st.dataframe(unc_df, hide_index=True, use_container_width=True,
+                         column_config=col_config)
+
+    with tabs[-1]:
+        na_df = df_all[df_all[S["col_category"]] == "해당없음"].reset_index(drop=True)
+        if na_df.empty:
+            st.caption(S["no_articles_na"])
+        else:
+            st.dataframe(na_df, hide_index=True, use_container_width=True,
                          column_config=col_config)

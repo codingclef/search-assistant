@@ -105,6 +105,7 @@ KO: dict[str, str] = {
     "feedback_no_changes": "변경된 분류가 없습니다.",
     "no_articles_in_cat": "해당 카테고리로 분류된 기사가 없습니다.",
     "no_articles_holdup": "보류로 분류된 기사가 없습니다.",
+    "no_articles_na": "해당없음으로 분류된 기사가 없습니다.",
     # 미리보기
     "preview_expander": "📋 엑셀 출력 형식 미리보기",
     "preview_ilam": "**일람 시트** (수집된 모든 기사)",
@@ -123,6 +124,7 @@ KO: dict[str, str] = {
     # 시트명 / 탭명
     "sheet_ilam": "일람",
     "sheet_holdup": "보류",
+    "sheet_na": "해당없음",
     # 검색엔진 표시값
     "engine_naver": "네이버",
     "engine_daum": "다음",
@@ -233,6 +235,7 @@ JA: dict[str, str] = {
     "feedback_no_changes": "変更された分類がありません。",
     "no_articles_in_cat": "このカテゴリに分類された記事はありません。",
     "no_articles_holdup": "保留に分類された記事はありません。",
+    "no_articles_na": "該当なしに分類された記事はありません。",
     # プレビュー
     "preview_expander": "📋 Excel出力フォーマットプレビュー",
     "preview_ilam": "**一覧シート**（収集した全記事）",
@@ -251,6 +254,7 @@ JA: dict[str, str] = {
     # シート名 / タブ名
     "sheet_ilam": "一覧",
     "sheet_holdup": "保留",
+    "sheet_na": "該当なし",
     # 検索エンジン表示値
     "engine_naver": "NAVER",
     "engine_daum": "Daum",
