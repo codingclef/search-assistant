@@ -56,13 +56,7 @@ def search_daum_news(
 
             soup = BeautifulSoup(response.text, "lxml")
 
-            # 다음 뉴스 검색 결과 아이템 셀렉터 (다음 HTML 구조에 맞게 시도)
-            news_items = (
-                soup.select("li.item-ad")
-                or soup.select(".c-item-search")
-                or soup.select("ul.list-basic > li")
-                or soup.select(".wrap_cont")
-            )
+            news_items = soup.select("li[data-docid]")
 
             if not news_items:
                 break
@@ -96,16 +90,7 @@ def _parse_item(
     """BeautifulSoup 아이템에서 기사 정보를 파싱합니다."""
     try:
         # 제목 & 링크
-        title_el = (
-            item.select_one("a.tit-g")
-            or item.select_one(".tit_g a")
-            or item.select_one("a[class*='tit']")
-            or item.select_one("strong a")
-            or item.select_one("h3 a")
-            or item.select_one("h4 a")
-            or item.select_one("a[href*='news']")
-        )
-
+        title_el = item.select_one("div.item-title strong.tit-g a")
         if not title_el:
             return None
 
@@ -116,22 +101,11 @@ def _parse_item(
             return None
 
         # 언론사
-        source_el = (
-            item.select_one(".info_news")
-            or item.select_one(".f-ebold")
-            or item.select_one("[class*='source']")
-            or item.select_one("[class*='media']")
-            or item.select_one("[class*='press']")
-        )
+        source_el = item.select_one("strong.tit_item span.txt_info")
         source = source_el.get_text(strip=True) if source_el else ""
 
         # 날짜
-        date_el = (
-            item.select_one(".info_date")
-            or item.select_one("[class*='date']")
-            or item.select_one("[class*='time']")
-            or item.select_one("span.f-small")
-        )
+        date_el = item.select_one("span.gem-subinfo span.txt_info")
         date_str = date_el.get_text(strip=True) if date_el else ""
         pub_dt = _parse_date(date_str)
 
@@ -142,11 +116,7 @@ def _parse_item(
             return None
 
         # 요약
-        desc_el = (
-            item.select_one(".f-eb")
-            or item.select_one("[class*='desc']")
-            or item.select_one("p")
-        )
+        desc_el = item.select_one("p.conts-desc")
         description = desc_el.get_text(strip=True) if desc_el else ""
 
         return {
