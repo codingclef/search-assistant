@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html as html_lib
 import requests
 import re
 import time as time_module
@@ -101,8 +102,9 @@ def search_naver_news(
 
 
 def _clean_html(text: str) -> str:
-    """HTML 태그 제거"""
-    return re.sub(r"<[^>]+>", "", text).strip()
+    """HTML 태그 제거 및 엔티티 디코딩 (&quot; → " 등)"""
+    text = re.sub(r"<[^>]+>", "", text)
+    return html_lib.unescape(text).strip()
 
 
 def _extract_source(url: str) -> str:
