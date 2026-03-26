@@ -245,10 +245,12 @@ with col_right:
     if "password" in st.session_state.val_errors:
         st.error("비밀번호가 일치하지 않습니다.")
 
+    st.write("")
+    monitoring_clicked = st.button("🔍 모니터링 시작", type="primary", use_container_width=True)
+
 # ────────────────────────────────────────────────
-# 모니터링 시작 버튼
+# 모니터링 시작 처리
 # ────────────────────────────────────────────────
-st.divider()
 
 # 입력값 수집
 keywords = [k.strip() for k in keywords_raw.split(",") if k.strip()]
@@ -259,7 +261,7 @@ for cat_id in st.session_state.cat_ids:
     if name:
         categories[name] = cond
 
-if st.button("🔍 모니터링 시작", type="primary", use_container_width=True):
+if monitoring_clicked:
 
     # ── 입력값 검증 ──
     errors = set()
