@@ -99,10 +99,12 @@ def _parse_item(item, keyword: str) -> dict | None:
         source_el = item.select_one("strong.tit_item span.txt_info")
         source = source_el.get_text(strip=True) if source_el else ""
 
-        # 날짜 (Daum 서버가 sd/ed로 이미 필터링하므로 클라이언트 범위 체크 불필요)
-        date_el = item.select_one("span.gem-subinfo span.txt_info")
-        date_str = date_el.get_text(strip=True) if date_el else ""
-        pub_dt = _parse_date(date_str)
+        # 날짜: URL에 포함된 정확한 타임스탬프 우선, 없으면 상대 시간 fallback
+        pub_dt = _extract_pub_dt_from_link(link)
+        if pub_dt is None:
+            date_el = item.select_one("span.gem-subinfo span.txt_info")
+            date_str = date_el.get_text(strip=True) if date_el else ""
+            pub_dt = _parse_date(date_str)
 
         # 요약
         desc_el = item.select_one("p.conts-desc")
@@ -122,6 +124,17 @@ def _parse_item(item, keyword: str) -> dict | None:
 
     except Exception:
         return None
+
+
+def _extract_pub_dt_from_link(link: str) -> datetime | None:
+    """v.daum.net/v/YYYYMMDDHHMMSS... URL에서 정확한 발행 시각 추출"""
+    match = re.search(r"v\.daum\.net/v/(\d{14})", link or "")
+    if match:
+        try:
+            return datetime.strptime(match.group(1), "%Y%m%d%H%M%S")
+        except ValueError:
+            pass
+    return None
 
 
 def _parse_date(date_str: str) -> datetime | None:
