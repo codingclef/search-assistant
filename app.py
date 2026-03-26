@@ -485,33 +485,34 @@ if st.session_state.excel_bytes:
     )
 
 # ────────────────────────────────────────────────
-# 엑셀 출력 형식 미리보기
+# 엑셀 출력 형식 미리보기 (결과가 없을 때만 표시)
 # ────────────────────────────────────────────────
-st.divider()
-with st.expander(S["preview_expander"]):
-    st.markdown(S["preview_ilam"])
-    st.table({
-        S["col_no"]: [1, 2],
-        S["col_keyword"]: [S["preview_kw_1"], S["preview_kw_2"]],
-        S["col_datetime"]: ["2024-03-25 09:30", "2024-03-25 10:15"],
-        S["col_engine"]: [S["engine_naver"], S["engine_daum"]],
-        S["col_media"]: [S["preview_media_1"], S["preview_media_2"]],
-        S["col_title"]: [S["preview_title_1"], S["preview_title_2"]],
-        S["col_link"]: ["https://...", "https://..."],
-        S["col_category"]: [S["preview_cat_1"], S["preview_cat_2"]],
-    })
+if not st.session_state.result_summary:
+    st.divider()
+    with st.expander(S["preview_expander"]):
+        st.markdown(S["preview_ilam"])
+        st.table({
+            S["col_no"]: [1, 2],
+            S["col_keyword"]: [S["preview_kw_1"], S["preview_kw_2"]],
+            S["col_datetime"]: ["2024-03-25 09:30", "2024-03-25 10:15"],
+            S["col_engine"]: [S["engine_naver"], S["engine_daum"]],
+            S["col_media"]: [S["preview_media_1"], S["preview_media_2"]],
+            S["col_title"]: [S["preview_title_1"], S["preview_title_2"]],
+            S["col_link"]: ["https://...", "https://..."],
+            S["col_category"]: [S["preview_cat_1"], S["preview_cat_2"]],
+        })
 
-    st.markdown(S["preview_other"])
-    st.table({
-        S["col_no"]: [1, 2],
-        S["col_keyword"]: [S["preview_kw_1"], S["preview_kw_2"]],
-        S["col_datetime"]: ["2024-03-25 09:30", "2024-03-25 10:15"],
-        S["col_engine"]: [S["engine_naver"], S["engine_daum"]],
-        S["col_media"]: [S["preview_media_1"], S["preview_media_2"]],
-        S["col_title"]: [S["preview_title_1"], S["preview_title_2"]],
-        S["col_link"]: ["https://...", "https://..."],
-        S["col_reason"]: [S["preview_reason_1"], S["preview_reason_2"]],
-    })
+        st.markdown(S["preview_other"])
+        st.table({
+            S["col_no"]: [1, 2],
+            S["col_keyword"]: [S["preview_kw_1"], S["preview_kw_2"]],
+            S["col_datetime"]: ["2024-03-25 09:30", "2024-03-25 10:15"],
+            S["col_engine"]: [S["engine_naver"], S["engine_daum"]],
+            S["col_media"]: [S["preview_media_1"], S["preview_media_2"]],
+            S["col_title"]: [S["preview_title_1"], S["preview_title_2"]],
+            S["col_link"]: ["https://...", "https://..."],
+            S["col_reason"]: [S["preview_reason_1"], S["preview_reason_2"]],
+        })
 
 # ────────────────────────────────────────────────
 # 분류 결과 확인 & 피드백
