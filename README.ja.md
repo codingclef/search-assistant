@@ -1,6 +1,6 @@
 # 📰 ニュースモニタリングアシスタント
 
-[한국어](README.md) | **[日本語]**
+[한국어](README.md) | **[日本語]** | [English](README.en.md)
 
 NaverとDaumのニュースを収集し、GPT AIが記事を自動分類してExcelに出力するWebアプリケーションです。
 Streamlitで動作し、韓国語・日本語のUIに対応しています。
