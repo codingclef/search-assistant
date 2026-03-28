@@ -286,13 +286,17 @@ with col_left:
 with col_right:
     st.subheader(S["section_settings"])
 
-    search_date = st.date_input(S["date_label"], value=date.today())
+    col_sd, col_st = st.columns([2, 1])
+    with col_sd:
+        start_date = st.date_input(S["start_label"], value=date.today(), key="start_date_input")
+    with col_st:
+        start_time = st.time_input("_st", value=time(9, 0), help=S["time_help"], label_visibility="hidden", key="start_time_input")
 
-    col_t1, col_t2 = st.columns(2)
-    with col_t1:
-        start_time = st.time_input(S["start_time_label"], value=time(9, 0), help=S["time_help"], key="start_time_input")
-    with col_t2:
-        end_time = st.time_input(S["end_time_label"], value=time(13, 0), key="end_time_input")
+    col_ed, col_et = st.columns([2, 1])
+    with col_ed:
+        end_date = st.date_input(S["end_label"], value=date.today(), key="end_date_input")
+    with col_et:
+        end_time = st.time_input("_et", value=time(13, 0), label_visibility="hidden", key="end_time_input")
 
     if "time_range" in st.session_state.val_errors:
         st.error(S["time_range_err"])
@@ -330,12 +334,15 @@ for cat_id in st.session_state.cat_ids:
 if monitoring_clicked:
 
     # ── 입력값 검증 ──
+    start_dt = datetime.combine(start_date, start_time)
+    end_dt = datetime.combine(end_date, end_time)
+
     errors = set()
     if not keywords:
         errors.add("keywords")
     if not categories:
         errors.add("categories")
-    if start_time >= end_time:
+    if start_dt >= end_dt:
         errors.add("time_range")
     if not use_naver and not use_daum:
         errors.add("engines")
@@ -347,9 +354,6 @@ if monitoring_clicked:
         st.rerun()
 
     st.session_state.val_errors = set()
-
-    start_dt = datetime.combine(search_date, start_time)
-    end_dt = datetime.combine(search_date, end_time)
 
     status_box = st.empty()
     progress_bar = st.progress(0)

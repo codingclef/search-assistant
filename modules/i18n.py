@@ -53,6 +53,8 @@ KO: dict[str, str] = {
     "categories_err": "시트명을 1개 이상 입력해주세요.",
     # 모니터링 설정
     "section_settings": "④ 모니터링 설정",
+    "start_label": "시작",
+    "end_label": "종료",
     "date_label": "날짜",
     "start_time_label": "시작 시간",
     "end_time_label": "종료 시간",
@@ -67,7 +69,7 @@ KO: dict[str, str] = {
     "password_label": "비밀번호",
     "password_placeholder": "비밀번호를 입력하세요",
     "password_err": "비밀번호가 일치하지 않습니다.",
-    "time_range_err": "시작 시간이 종료 시간보다 앞이어야 합니다.",
+    "time_range_err": "시작 일시가 종료 일시보다 앞이어야 합니다.",
     "start_button": "🔍 모니터링 시작",
     # 진행
     "spinner_text": "모니터링 진행 중...",
@@ -184,6 +186,8 @@ JA: dict[str, str] = {
     "categories_err": "シート名を1つ以上入力してください。",
     # モニタリング設定
     "section_settings": "④ モニタリング設定",
+    "start_label": "開始",
+    "end_label": "終了",
     "date_label": "日付",
     "start_time_label": "開始時間",
     "end_time_label": "終了時間",
@@ -198,7 +202,7 @@ JA: dict[str, str] = {
     "password_label": "パスワード",
     "password_placeholder": "パスワードを入力してください",
     "password_err": "パスワードが一致しません。",
-    "time_range_err": "開始時間は終了時間より前である必要があります。",
+    "time_range_err": "開始日時は終了日時より前である必要があります。",
     "start_button": "🔍 モニタリング開始",
     # 進行
     "spinner_text": "モニタリング処理中...",
